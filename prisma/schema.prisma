@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id         Int        @id @default(autoincrement())
+  email      String     @db.VarChar(100)
+  password   String     @db.VarChar(200)
+  active     Boolean    @default(true)
+  created_at DateTime   @default(now())
+  clients    Client[]
+  products   Product[]
+  category   Category[]
+  animals    Animal[]
+  vaccines   Vaccine[]
+
+  @@map("tb_account")
+}
+
+model Client {
+  id           Int      @id @default(autoincrement())
+  account      Account  @relation(fields: [id_account], references: [id])
+  id_account   Int
+  fullname     String
+  cpf          String
+  email        String
+  active       Boolean  @default(true)
+  cep          String?
+  street       String?
+  house_number Int?
+  complement   String?
+  neighborhood String?
+  city         String?
+  state        String?
+  obs          String?
+  created_at   DateTime @default(now())
+  animals      Animal[]
+
+  @@map("tb_client")
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String
+  stock       Int?
+  value       Decimal   @db.Decimal(9, 2)
+  active      Boolean   @default(true)
+  obs         String?
+  created_at  DateTime  @default(now())
+  id_category Int?
+  category    Category? @relation(fields: [id_category], references: [id], onDelete: SetNull)
+  account     Account   @relation(fields: [id_account], references: [id])
+  id_account  Int
+
+  @@map("tb_product")
+}
+
+model Category {
+  id         Int       @id @default(autoincrement())
+  name       String
+  active     Boolean   @default(true)
+  created_at DateTime  @default(now())
+  products   Product[]
+  account    Account   @relation(fields: [id_account], references: [id])
+  id_account Int       @default(8)
+
+  @@map("tb_category")
+}
+
+model Animal {
+  id                   Int       @id @default(autoincrement())
+  petname              String    @db.VarChar(100)
+  specie               String    @db.VarChar(50)
+  breed                String    @db.VarChar(50)
+  gender               Gender
+  date_birth           DateTime  @db.Date
+  general_registration Int?
+  fathername           String?   @db.VarChar(100)
+  mothername           String?   @db.VarChar(100)
+  preferred_food       String?   @db.VarChar(100)
+  id_tutor             Int
+  tutor                Client?   @relation(fields: [id_tutor], references: [id])
+  vaccines             Vaccine[]
+  account              Account   @relation(fields: [id_account], references: [id])
+  id_account           Int
+
+  @@map("tb_animal")
+}
+
+model Vaccine {
+  id               Int      @id @default(autoincrement())
+  vaccine          String
+  doses            String
+  period           String
+  application_date DateTime @db.Date
+  next_date        DateTime @db.Date
+  comments         String?
+  id_animal        Int
+  Animal           Animal?  @relation(fields: [id_animal], references: [id], onDelete: Cascade)
+  account          Account  @relation(fields: [id_account], references: [id])
+  id_account       Int
+
+  @@map("tb_vaccine")
+}
+
+enum Gender {
+  Male
+  Female
+}

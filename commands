@@ -1,0 +1,3 @@
+--gerar migrations
+-- executar quando precisar atualizar a migration
+yarn prisma migrate dev
